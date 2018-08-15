@@ -20,7 +20,8 @@ function checkCrash(data) {
     }
 }
 
-self.addEventListener('install', function (event) {
+self.addEventListener('install', function(e) {
+    console.log("安装完毕");
     // 说明有崩溃页面记录
     if (crashPages.length > 0) {
         console.log("有崩溃页面记录");
@@ -36,7 +37,7 @@ self.addEventListener('install', function (event) {
             })
         })
     }
-});
+  })
 
 self.addEventListener('message', (e) => {
     const data = e.data;
