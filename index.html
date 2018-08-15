@@ -44,7 +44,7 @@
         let res = event.data;
         let data = res.data;
 
-        if(data.type && data.type == "crash") {
+        if(data && data.type == "crash") {
             console.log(data);
         } else {
             console.log(data.message);

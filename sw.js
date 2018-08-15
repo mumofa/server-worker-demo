@@ -20,7 +20,7 @@ function checkCrash(data) {
     }
 }
 
-self.addEventListener('install', function(e) {
+self.addEventListener('install', function (e) {
     console.log("安装完毕");
     // 说明有崩溃页面记录
     if (crashPages.length > 0) {
@@ -30,14 +30,32 @@ self.addEventListener('install', function(e) {
                 crashPages.forEach(item => {
                     client.postMessage({
                         ...item,
-                        type : "crash",
+                        type: "crash",
                         message: '之前的页面崩溃了'
                     });
                 });
             })
         })
     }
-  })
+})
+self.addEventListener('activate', function (e) {
+    console.log("激活完毕");
+    // 说明有崩溃页面记录
+    if (crashPages.length > 0) {
+        console.log("有崩溃页面记录");
+        self.clients.matchAll().then(function (clients) {
+            clients.forEach(function (client) {
+                crashPages.forEach(item => {
+                    client.postMessage({
+                        ...item,
+                        type: "crash",
+                        message: '之前的页面崩溃了'
+                    });
+                });
+            })
+        })
+    }
+})
 
 self.addEventListener('message', (e) => {
     const data = e.data;
