@@ -41,10 +41,9 @@
         });
 
     navigator.serviceWorker.addEventListener('message', function (event) {
-        let res = event.data;
-        let data = res.data;
+        let data = event.data;
 
-        if(data && data.type == "crash") {
+        if(data.type == "crash") {
             console.log(data);
         } else {
             console.log(res.message);
