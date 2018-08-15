@@ -23,17 +23,18 @@ function checkCrash(data) {
 self.addEventListener('install', function (event) {
     // 说明有崩溃页面记录
     if (crashPages.length > 0) {
+        console.log("有崩溃页面记录");
         self.clients.matchAll().then(function (clients) {
             clients.forEach(function (client) {
-                client.postMessage({
-                    command: 'broadcastOnRequest',
-                    message: 'This is a broadcast on request from the SW'
+                crashPages.forEach(item => {
+                    client.postMessage({
+                        ...item,
+                        type : "crash",
+                        message: '之前的页面崩溃了'
+                    });
                 });
             })
         })
-        // crashPages.forEach(item => {
-        //     self.
-        // });
     }
 });
 
@@ -53,7 +54,7 @@ self.addEventListener('message', (e) => {
             clients.forEach(function (client) {
                 client.postMessage({
                     command: 'broadcastOnRequest',
-                    message: 'This is a broadcast on request from the SW'
+                    message: '接收到心跳信息'
                 });
             })
         })

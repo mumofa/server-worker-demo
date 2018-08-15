@@ -15,7 +15,7 @@
             console.log('Boo!', err);
         }).then(function() {
             if (navigator.serviceWorker.controller !== null) {
-                console.log(1);
+                console.log("心跳开始");
                 let HEARTBEAT_INTERVAL = 5 * 1000; // 每五秒发一次心跳
                 let sessionId = window.location.href;
                 let heartbeat = function () {
@@ -41,9 +41,13 @@
         });
 
     navigator.serviceWorker.addEventListener('message', function (event) {
-        console.log(event);
-        if (e.data === 'sw.update') {
-            // 此处可以操作页面的 DOM 元素啦
+        let res = event.data;
+        let data = res.data;
+
+        if(data.type == "crash") {
+            console.log(data);
+        } else {
+            console.log(data.message);
         }
     });
 
