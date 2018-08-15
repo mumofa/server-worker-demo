@@ -1,14 +1,16 @@
 const CHECK_CRASH_INTERVAL = 10 * 1000; // 每 10s 检查一次
 const CRASH_THRESHOLD = 15 * 1000; // 15s 超过15s没有心跳则认为已经 crash
 const pages = {};
+const crashPages = [];
 let timer;
 
-function checkCrash() {
+function checkCrash(data) {
     const now = Date.now();
     for (var id in pages) {
         let page = pages[id];
         if ((now - page.t) > CRASH_THRESHOLD) {
             // 上报 crash
+            crashPages.push(data);
             delete pages[id];
         }
     }
@@ -18,6 +20,23 @@ function checkCrash() {
     }
 }
 
+self.addEventListener('install', function (event) {
+    // 说明有崩溃页面记录
+    if (crashPages.length > 0) {
+        self.clients.matchAll().then(function (clients) {
+            clients.forEach(function (client) {
+                client.postMessage({
+                    command: 'broadcastOnRequest',
+                    message: 'This is a broadcast on request from the SW'
+                });
+            })
+        })
+        // crashPages.forEach(item => {
+        //     self.
+        // });
+    }
+});
+
 self.addEventListener('message', (e) => {
     const data = e.data;
     if (data.type === 'heartbeat') {
@@ -26,9 +45,18 @@ self.addEventListener('message', (e) => {
         }
         if (!timer) {
             timer = setInterval(function () {
-                checkCrash();
+                checkCrash(data.data);
             }, CHECK_CRASH_INTERVAL);
         }
+
+        self.clients.matchAll().then(function (clients) {
+            clients.forEach(function (client) {
+                client.postMessage({
+                    command: 'broadcastOnRequest',
+                    message: 'This is a broadcast on request from the SW'
+                });
+            })
+        })
     } else if (data.type === 'unload') {
         delete pages[data.id];
     }
