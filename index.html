@@ -1,55 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
 </head>
+
 <body>
-<script>
-    navigator.serviceWorker.register('./sw.js')
-        .then(function(reg) {
-            console.log('SW registered!', reg);
-        }).catch(function(err) {
-            console.log('Boo!', err);
-        }).then(function() {
-            if (navigator.serviceWorker.controller !== null) {
-                console.log("心跳开始");
-                let HEARTBEAT_INTERVAL = 5 * 1000; // 每五秒发一次心跳
-                let sessionId = window.location.href;
-                let heartbeat = function () {
-                    navigator.serviceWorker.controller.postMessage({
-                        type: 'heartbeat',
-                        id: sessionId,
-                        // 附加信息，如果页面 crash，上报的附加数据
-                        data: {
-                            href : sessionId,
-                            time : Date.now()
-                        } 
+    <input type="file" id="input">
+    <script src="jquery-core.min.js"></script>
+    <script src="psd.min.js"></script>
+    <script>
+        var PSD = require('psd');
+        navigator.serviceWorker.register('./sw.js')
+            .then(function (reg) {
+                console.log('SW registered!', reg);
+            }).catch(function (err) {
+                console.log('Boo!', err);
+            }).then(function () {
+                if (navigator.serviceWorker.controller !== null) {
+                    console.log("心跳开始");
+                    let HEARTBEAT_INTERVAL = 5 * 1000; // 每五秒发一次心跳
+                    let sessionId = window.location.href;
+                    let heartbeat = function () {
+                        navigator.serviceWorker.controller.postMessage({
+                            type: 'heartbeat',
+                            id: sessionId,
+                            // 附加信息，如果页面 crash，上报的附加数据
+                            data: {
+                                href: sessionId,
+                                time: Date.now()
+                            }
+                        });
+                    }
+                    window.addEventListener("beforeunload", function () {
+                        navigator.serviceWorker.controller.postMessage({
+                            type: 'unload',
+                            id: sessionId
+                        });
                     });
+                    setInterval(heartbeat, HEARTBEAT_INTERVAL);
+                    heartbeat();
                 }
-                window.addEventListener("beforeunload", function() {
-                    navigator.serviceWorker.controller.postMessage({
-                        type: 'unload',
-                        id: sessionId
-                    });
-                });
-                setInterval(heartbeat, HEARTBEAT_INTERVAL);
-                heartbeat();
+            });
+
+        navigator.serviceWorker.addEventListener('message', function (event) {
+            let data = event.data;
+
+            if (data.type == "crash") {
+                console.log(data);
+            } else {
+                console.log(data.message);
             }
         });
 
-    navigator.serviceWorker.addEventListener('message', function (event) {
-        let data = event.data;
+        function psduploadChange(e) {
 
-        if(data.type == "crash") {
-            console.log(data);
-        } else {
-            console.log(data.message);
+            var _width, _height, _tmpChild, _psdErrorWindow;
+            var url = URL.createObjectURL(e.target.files[0]);
+
+            PSD.fromURL(url).then( function(psd) {
+                console.log(psd);
+            });
         }
-    });
 
-</script>
+        $("#input").on("change", function (e) {
+            if (!e.target.value) {
+                return;
+            }
+            psduploadChange(e);
+            e.target.value = "";
+        });
+    </script>
 </body>
+
 </html>
