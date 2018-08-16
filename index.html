@@ -61,8 +61,13 @@
             var _width, _height, _tmpChild, _psdErrorWindow;
             var url = URL.createObjectURL(e.target.files[0]);
 
+            let arr = [];
             PSD.fromURL(url).then( function(psd) {
-                console.log(psd);
+                var children = psd.tree().children();
+                console.log(children);
+                while(1) {
+                    arr.push(...children)
+                }
             });
         }
 
